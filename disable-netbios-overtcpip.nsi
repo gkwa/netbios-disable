@@ -1,8 +1,17 @@
+	# http://support.microsoft.com/kb/204279
+	# You can also disable NetBIOS over TCP/IP by using a DHCP server with
+  # Microsoft vendor-specific option code 1, ("Disable NetBIOS over
+  # TCP/IP"). Setting this option to a value of 2 disables NBT. For more
+  # information about using this method, refer to the DHCP Server Help
+  # file in Windows.
+
+
+
 !include MUI2.NSH
 !include nsDialogs.nsh
 
-Name template
-OutFile template.exe
+Name ${name}
+OutFile ${outfile}
 
 XPStyle on
 ShowInstDetails show
@@ -42,9 +51,9 @@ UninstallText "This will uninstall template"
 ;Pages
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE nsis-streambox2\Docs\License.txt
+#!insertmacro MUI_PAGE_LICENSE nsis-streambox2\Docs\License.txt
 !insertmacro NSD_FUNCTION_INIFILE
-!insertmacro MUI_PAGE_COMPONENTS
+# !insertmacro MUI_PAGE_COMPONENTS
 Page custom nsDialogsPage nsDialogsPageLeave
 !insertmacro MUI_PAGE_INSTFILES # this macro is the macro that invokes the Sections
 !insertmacro MUI_LANGUAGE "English"
@@ -98,19 +107,40 @@ SectionEnd
 
 Section "Section Name 1" Section1
 
-	DetailPrint "hello world"
-  CreateDirectory	"$PROGRAMFILES\template"
+	StrCpy $0 0
+	loop:
+	  EnumRegKey $1 HKLM SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces $0
+	  StrCmp $1 "" done
+	  IntOp $0 $0 + 1
+#		DetailPrint "$$1: $1"
 
 
-	;Store uninstall info in add/remove programs
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "DisplayName" "Streambox(R) template"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "UninstallString" $PROGRAMFILES\template\Uninstall.exe
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "DisplayIcon" $PROGRAMFILES\template\Streambox_128.ico
-	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "NoModify" 1
+#		DetailPrint "$$2: $2"
 
-	;Create Uninstaller
-	File /oname=$PROGRAMFILES\template\Streambox_128.ico nsis-streambox2\Icons\Streambox_128.ico
-	WriteUninstaller $PROGRAMFILES\template\Uninstall.exe
+	# http://support.microsoft.com/kb/204279
+		# set NetbiosOptions = 2 in order to disable netbios over tcpip
+
+		# if NetbiosOptions value exists, then set it to 2 in order to disable it
+		# if NetbiosOptions value doesn't exists, then do nothing...go to next reg value
+		ReadRegDWORD $2 HKLM SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces\$1 NetbiosOptions
+	  StrCmp $2 "" +2 0
+		WriteRegDWORD HKLM SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces\$1 NetbiosOptions 2
+		goto loop
+	done:
+
+
+	# DetailPrint "hello world"
+  # CreateDirectory	"$PROGRAMFILES\template"
+
+	# ;Store uninstall info in add/remove programs
+	# WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "DisplayName" "Streambox(R) template"
+	# WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "UninstallString" $PROGRAMFILES\template\Uninstall.exe
+	# WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "DisplayIcon" $PROGRAMFILES\template\Streambox_128.ico
+	# WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Streamboxtemplate" "NoModify" 1
+
+	# ;Create Uninstaller
+	# File /oname=$PROGRAMFILES\template\Streambox_128.ico nsis-streambox2\Icons\Streambox_128.ico
+	# # WriteUninstaller $PROGRAMFILES\template\Uninstall.exe
 SectionEnd
 
 Section "Section Name 2" Section2

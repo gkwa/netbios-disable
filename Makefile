@@ -1,17 +1,17 @@
-disable-netbios-overtcpip : disable-netbios-overtcpip.nsi
-	makensis disable-netbios-overtcpip.nsi
+name=disable-netbios-overtcpip
+outfile=$(name).exe
 
-disable-netbios-overtcpip.exe : disable-netbios-overtcpip.nsi
-	makensis disable-netbios-overtcpip.nsi
+$(outfile): $(name).nsi
+	makensis \
+		/Doutfile=$(outfile) \
+		/Dname=$(name) \
+		$<
 
-run : disable-netbios-overtcpip.exe
-	cmd /c Disable-Netbios-OvertcpipName.exe
+test: $(outfile)
+	cmd /c $(outfile)
+.PHONY: test
 
-un : 
-	"c:/Program Files/Disable-Netbios-OvertcpipName/Uninstall.exe"
-	cd "c:/Program Files"
-
-full : run un
-
-clean : 
-	rm Disable-Netbios-Overtcpip.exe
+clean: 
+	rm -f \
+		$(outfile)
+.PHONY: clean
