@@ -3,6 +3,7 @@ installer=$(name).exe
 
 $(installer): $(name).nsi
 	makensis \
+		/V2 \
 		/Doutfile=$(installer) \
 		/Dname=$(name) \
 		$<
