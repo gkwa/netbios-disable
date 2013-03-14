@@ -2,7 +2,7 @@ name=disable-netbios-overtcpip
 installer=$(name).exe
 
 $(installer): $(name).nsi
-	makensis \
+	@makensis \
 		/V2 \
 		/Doutfile=$(installer) \
 		/Dname=$(name) \
@@ -27,7 +27,7 @@ test_enableNetbios: $(installer)
 .PHONY: test_enableNetbios
 
 clean: 
-	rm -f \
+	@rm -f \
 		$(installer)
 .PHONY: clean
 
